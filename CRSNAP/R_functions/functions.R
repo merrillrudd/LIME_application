@@ -1,0 +1,6 @@
+source("R_functions\\adjust_date.R")
+source("R_functions\\calc_soak_time.R")
+source("R_functions\\catch_effort.R")
+source("R_functions\\length_frequency.R")
+source("R_functions\\mean_length.R")
+source("R_functions\\LIME_fits.R")
