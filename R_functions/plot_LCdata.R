@@ -1,7 +1,7 @@
 plot_LCdata <- function(lc_list, lc_years, gears, L50=NULL, S50=NULL){
 
 	require(RColorBrewer)
-	col_vec <- brewer.pal(max(3, length(gears)), "PuOr")
+	col_vec <- brewer.pal(max(4, length(gears)), "PuOr")
 	names(col_vec) <- gears
 	dim <- c(ceiling(sqrt(length(lc_years))), ceiling(sqrt(length(lc_years))))
 

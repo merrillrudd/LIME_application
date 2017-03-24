@@ -45,6 +45,10 @@ dir.create(figs_dir, showWarnings=FALSE)
 ###################################
 ## Load data
 ###################################
+
+## read nominal CPUE Index
+I_t <- readRDS(file.path(data_dir, "Nominal_CPUE.rds"))
+
 ## read weighted data
 LCprop <- readRDS(file.path(data_dir, "CR_Snapper_LFprop_weighted.rds"))
 LC <- readRDS(file.path(data_dir, "CR_Snapper_LF_weighted.rds"))
@@ -122,46 +126,87 @@ dev.off()
 ## Run assessments
 ###################################
 
-####################################
-## LC only
-####################################
-
 ############### weighted length comps ##########################
-### weighted length comp - counts
+### weighted length comp - counts with index
+out <- file.path(res_dir, "Index_LC_counts")
+dir.create(out, showWarnings=FALSE)
+
+run_model_set(dir=out, LC=LC, lh=plist, I_t=I_t, data_avail="Index_LC", rerun=FALSE)
+
+### weighted length comp - counts only
 out <- file.path(res_dir, "LC_counts")
 dir.create(out, showWarnings=FALSE)
 
-run_model_set(dir=out, LC=LC, lh=plist)
-Report <- readRDS(file.path(res_dir, "LC_counts", "Report.rds"))
+run_model_set(dir=out, LC=LC, lh=plist, data_avail="LC", rerun=FALSE)
+base_rep <- readRDS(file.path(res_dir, "LC_counts", "Report.rds"))
+df <- readRDS(file.path(res_dir, "LC_counts", "check_convergence.rds"))
+base_sdrep <- readRDS(file.path(res_dir, "LC_counts", "Sdreport.rds"))
+base_inputs <- readRDS(file.path(res_dir, "LC_counts", "Inputs.rds"))
+	### base model doesn't converge with abundance index
+read_sdreport(summary(base_sdrep)[which(rownames(summary(base_sdrep))=="SPR_t"),])
+  F40 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=seq(0,by=1,length.out=base_inputs$Data$n_a), Mat_a=base_rep$Mat_a, W_a=base_rep$W_a, M=base_rep$M, S_a=base_rep$S_a, ref=0.4)$root, error=function(e) NA)
+  F30 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=seq(0,by=1,length.out=base_inputs$Data$n_a), Mat_a=base_rep$Mat_a, W_a=base_rep$W_a, M=base_rep$M, S_a=base_rep$S_a, ref=0.3)$root, error=function(e) NA)
+
+
+############### weighted length comps w fixed selectivity ##########################
+## weighted length comps - counts with index - fixed selectivity
+out <- file.path(res_dir, "Index_LC_counts_Sfixed")
+dir.create(out, showWarnings=FALSE)
+
+run_model_set(dir=out, LC=LC, lh=plist, S_l_input=plist$S_l, I_t=I_t, data_avail="Index_LC")
+df <- readRDS(file.path(res_dir, "Index_LC_counts_Sfixed", "check_convergence.rds"))
+Report <- readRDS(file.path(res_dir, "Index_LC_counts_Sfixed", "Report.rds"))
+	### base model doesn't converge with abundance index - doesn't add any information
 
 ## weighted length comps - counts - fixed selectivity
 out <- file.path(res_dir, "LC_counts_Sfixed")
 dir.create(out, showWarnings=FALSE)
 
-# run_model_set(dir=out, LC=LC, lh=plist, fix_param="logS50")
-run_model_set(dir=out, LC=LC, lh=plist, S_l_input=plist$S_l)
-Report <- readRDS(file.path(res_dir, "LC_counts_Sfixed", "Report.rds"))
+run_model_set(dir=out, LC=LC, lh=plist, S_l_input=plist$S_l, data_avail="LC")
+sfixed_rep <- readRDS(file.path(res_dir, "LC_counts_Sfixed", "Report.rds"))
+df <- readRDS(file.path(res_dir, "LC_counts_Sfixed", "check_convergence.rds"))
+sfixed_sdrep <- readRDS(file.path(res_dir, "LC_counts_Sfixed", "Sdreport.rds"))
+sfixed_inputs <- readRDS(file.path(res_dir, "LC_counts_Sfixed", "Inputs.rds"))
+	### sfixed model doesn't converge with abundance index
+read_sdreport(summary(sfixed_sdrep)[which(rownames(summary(sfixed_sdrep))=="SPR_t"),], log=FALSE)
+  F40 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=seq(0,by=1,length.out=sfixed_inputs$Data$n_a), Mat_a=sfixed_rep$Mat_a, W_a=sfixed_rep$W_a, M=sfixed_rep$M, S_a=sfixed_rep$S_a, ref=0.4)$root, error=function(e) NA)
+  F30 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=seq(0,by=1,length.out=sfixed_inputs$Data$n_a), Mat_a=sfixed_rep$Mat_a, W_a=sfixed_rep$W_a, M=sfixed_rep$M, S_a=sfixed_rep$S_a, ref=0.3)$root, error=function(e) NA)
 
-## weighted length comps - counts - fixed selectivity -- lower sigmaR
-out <- file.path(res_dir, "LC_counts_Sfixed_lowerSigmaR")
+
+
+############### weighted length comps w fixed selectivity & fixed SigmaR ##########################
+## weighted length comps - counts - fixed selectivity -- fix SigmaR
+out <- file.path(res_dir, "LC_counts_Sfixed_SigmaRfixed")
 dir.create(out, showWarnings=FALSE)
 
-plist_lowerSigR <- with(plist, create_lh_list(vbk=vbk, linf=linf, lwa=lwa, lwb=lwb, S50=SL50, M50=ML50, S95=SL95, M95=ML95, selex_input="length", maturity_input="length", AgeMax=AgeMax, F1=F1, nseasons=1, SigmaR=0.3, SigmaF=SigmaF))
+run_model_set(dir=out, LC=LC, lh=plist, S_l_input=plist$S_l, est_sigma=NULL, param_adjust="SigmaR", val_adjust=0.7)
 
-run_model_set(dir=out, LC=LC, lh=plist_lowerSigR, S_l_input=plist_lowerSigR$S_l, est_sigma=NULL)
+## weighted length comps - counts - fixed selectivity -- fix SigmaR low
+out <- file.path(res_dir, "LC_counts_Sfixed_SigmaRfixedlow")
+dir.create(out, showWarnings=FALSE)
 
-### weighted length comps - proportions
+run_model_set(dir=out, LC=LC, lh=plist, S_l_input=plist$S_l, est_sigma=NULL, param_adjust="SigmaR", val_adjust=0.3)
+
+############### weighted length comps ##########################
+### weighted length comps - proportions + Index
+out <- file.path(res_dir, "Index_LC_prop")
+dir.create(out, showWarnings=FALSE)
+
+run_model_set(dir=out, LC=LCprop, lh=plist, I_t=I_t, data_avail="Index_LC")
+
+### weighted length comps - proportions only
 out <- file.path(res_dir, "LC_prop")
 dir.create(out, showWarnings=FALSE)
 
-run_model_set(dir=out, LC=LCprop, lh=plist)
+run_model_set(dir=out, LC=LCprop, lh=plist, data_avail="LC")
+bp_rep <- readRDS(file.path(res_dir, "LC_prop", "Report.rds"))
+
 
 ### weighted length comps - proportions - fixed selectivity
 out <- file.path(res_dir, "LC_prop_Sfixed")
 dir.create(out, showWarnings=FALSE)
 
 run_model_set(dir=out, LC=LCprop, lh=plist, S_l_input=plist$S_l)
-
 
 
 ## weighted length comps - dome-shaped selex
@@ -171,8 +216,6 @@ par(mfrow=c(1,1))
 plot(plist$S_l, type="l", lwd=3)
 lines(plist_lowdome$S_l, col="goldenrod", lwd=3, lty=2)
 lines(plist_highdome$S_l, col="purple", lwd=3, lty=3)
-
-
 
 ## weighted length comps - counts - low dome
 out <- file.path(res_dir, "LC_counts_lowdome")
@@ -192,9 +235,9 @@ run_model_set(dir=out, LC=LC, lh=plist, S_l_input=plist_highdome$S_l)
 out <- file.path(res_dir, "LC_counts_unweighted")
 dir.create(out, showWarnings=FALSE)
 
-# run_model_set(dir=out, LC=LC_raw, lh=plist)
-Report <- readRDS(file.path(out, "Report.rds"))
-Report$jnll
+run_model_set(dir=out, LC=LC_raw, lh=plist)
+Report <- readRDS(file.path(res_dir, "LC_counts_unweighted", "Report.rds"))
+# Report$jnll
 
 ### unweighted length comps - proportions
 out <- file.path(res_dir, "LC_prop_unweighted")
@@ -208,7 +251,16 @@ run_model_set(dir=out, LC=LCprop_raw, lh=plist)
 out <- file.path(res_dir, "LC_counts_BL")
 dir.create(out, showWarnings=FALSE)
 
-run_model_set(dir=out, LC=LC_bline, lh=plist)
+run_model_set(dir=out, LC=LC_bline, lh=plist, rerun=TRUE)
+bl_rep <- readRDS(file.path(res_dir, "LC_counts_BL", "Report.rds"))
+df <- readRDS(file.path(res_dir, "LC_counts_BL", "check_convergence.rds"))
+bl_sdrep <- readRDS(file.path(res_dir, "LC_counts_BL", "Sdreport.rds"))
+bl_inputs <- readRDS(file.path(res_dir, "LC_counts_BL", "Inputs.rds"))
+bl_lbspr <- readRDS(file.path(res_dir, "LC_counts_BL", "LBSPR_results.rds"))
+
+read_sdreport(summary(bl_sdrep)[which(rownames(summary(bl_sdrep))=="SPR_t"),], log=FALSE)
+  F40 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=seq(0,by=1,length.out=bl_inputs$Data$n_a), Mat_a=bl_rep$Mat_a, W_a=bl_rep$W_a, M=bl_rep$M, S_a=bl_rep$S_a, ref=0.4)$root, error=function(e) NA)
+  F30 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=seq(0,by=1,length.out=bl_inputs$Data$n_a), Mat_a=bl_rep$Mat_a, W_a=bl_rep$W_a, M=bl_rep$M, S_a=bl_rep$S_a, ref=0.3)$root, error=function(e) NA)
 
 ### bottom longline only length comps - proportions
 out <- file.path(res_dir, "LC_prop_BL")
@@ -222,153 +274,3 @@ run_model_set(dir=out, LC=LCprop_bline, lh=plist)
 
 
 
-
-		####################################
-		## LC only, DOME SELECTIVITY
-		####################################
-		sdome_lconly <- file.path(lconly_dir, "selex_dome")
-		dir.create(sdome_lconly, showWarnings=FALSE)
-
-		plist_lowdome <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=lbspr_res$SL50[length(lbspr_res$SL50)], S95=lbspr_res$SL95[length(lbspr_res$SL95)], selex_input="length", M50=34, maturity_input="length", SigmaR=0.3, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=bins[1], selex_type="dome", dome_sd=60)
-		plist_highdome <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=lbspr_res$SL50[length(lbspr_res$SL50)], S95=lbspr_res$SL95[length(lbspr_res$SL95)],  selex_input="length", M50=34, maturity_input="length", SigmaR=0.3, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=bins[1], selex_type="dome", dome_sd=30)
-
-			plot(plist$S_l, type="l", lwd=3)
-			lines(plist_lowdome$S_l, col="goldenrod", lwd=3, lty=2)
-			lines(plist_highdome$S_l, col="purple", lwd=3, lty=3)
-
-			##############################################
-			## LC only, DOME SELECTIVITY - LOW DOME DEFAULT
-			##############################################
-			lowdome_lconly_default <- file.path(sdome_lconly, "low_dome_default")
-			dir.create(lowdome_lconly_default, showWarnings=FALSE)	
-
-				## run models
-				res <- run_LIME(modpath=lowdome_lconly_default, write=TRUE, lh=plist_lowdome, input_data=input_data, est_sigma="log_sigma_R", data_avail="LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2), S_l_input=plist_lowdome$S_l)
-				
-				Report <- readRDS(file.path(lowdome_lconly_default, "Report.rds"))
-				Sdreport <- readRDS(file.path(lowdome_lconly_default, "Sdreport.rds"))
-				Inputs <- readRDS(file.path(lowdome_lconly_default, "Inputs.rds"))
-
-				png(file.path(lowdome_lconly_default, "output.png"), width=16, height=10, res=200, units="in")
-				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()				
-
-				png(file.path(lowdome_lconly_default, "LCfits.png"), width=16, height=10, res=200, units="in")
-				plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()
-
-			##############################################
-			## LC only, DOME SELECTIVITY - HIGH DOME DEFAULT
-			##############################################
-			highdome_lconly_default <- file.path(sdome_lconly, "high_dome_default")
-			dir.create(highdome_lconly_default, showWarnings=FALSE)	
-
-				## run models
-				res <- run_LIME(modpath=highdome_lconly_default, write=TRUE, lh=plist_highdome, input_data=input_data, est_sigma="log_sigma_R", data_avail="LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2), S_l_input=plist_highdome$S_l)
-				
-				Report <- readRDS(file.path(highdome_lconly_default, "Report.rds"))
-				Sdreport <- readRDS(file.path(highdome_lconly_default, "Sdreport.rds"))
-				Inputs <- readRDS(file.path(highdome_lconly_default, "Inputs.rds"))
-
-				png(file.path(highdome_lconly_default, "output.png"), width=16, height=10, res=200, units="in")
-				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()				
-
-				png(file.path(highdome_lconly_default, "LCfits.png"), width=16, height=10, res=200, units="in")
-				plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()
-
-####################################
-## LC +Index
-####################################
-
-lcindex_dir <- file.path(res_dir, "lc_index")
-dir.create(lcindex_dir, showWarnings=FALSE)
-
-years_o <- as.numeric(rownames(LC))
-years_t <- min(years_o):max(years_o)
-
-input_data <- list("years"=years_t, "LF"=LC, "I_t"=I_t)
-
-		####################################
-		## LC + Index, LOGISTIC SELECTIVITY
-		####################################
-		slogis_lcindex <- file.path(lcindex_dir, "selex_logistic")
-		dir.create(slogis_lcindex, showWarnings=FALSE)
-
-			##############################################
-			## LC + Index, LOGISTIC SELECTIVITY - DEFAULT
-			##############################################
-			slogis_lcindex_default <- file.path(slogis_lcindex, "default")
-			dir.create(slogis_lcindex_default, showWarnings=FALSE)	
-
-				## run models
-				res <- run_LIME(modpath=slogis_lcindex_default, write=TRUE, lh=plist, input_data=input_data, est_sigma="log_sigma_R", data_avail="Index_LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2))
-				
-				Report <- readRDS(file.path(slogis_lcindex_default, "Report.rds"))
-				Sdreport <- readRDS(file.path(slogis_lcindex_default, "Sdreport.rds"))
-				Inputs <- readRDS(file.path(slogis_lcindex_default, "Inputs.rds"))
-
-				png(file.path(slogis_lcindex_default, "output.png"), width=16, height=10, res=200, units="in")
-				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()				
-
-				png(file.path(slogis_lcindex_default, "LCfits.png"), width=16, height=10, res=200, units="in")
-				plot_LC(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()
-
-
-		####################################
-		## LC + Index, DOME SELECTIVITY
-		####################################
-		sdome_lcindex <- file.path(lcindex_dir, "selex_dome")
-		dir.create(sdome_lcindex, showWarnings=FALSE)
-
-		plist_lowdome <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, t0=t0_toUse, lwa=lwa_toUse, lwb=lwb_toUse, M=M_toUse, S50=34.6, selex_input="length", M50=34.6, maturity_input="length", binwidth=2, nseasons=1, selex_type="dome", dome_sd=50)
-		plist_highdome <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, t0=t0_toUse, lwa=lwa_toUse, lwb=lwb_toUse, M=M_toUse, S50=34.6, selex_input="length", M50=34.6, maturity_input="length", binwidth=2, nseasons=1, selex_type="dome", dome_sd=25)
-
-			plot(plist$S_l, type="l", lwd=3)
-			lines(plist_lowdome$S_l, col="goldenrod", lwd=3, lty=2)
-			lines(plist_highdome$S_l, col="purple", lwd=3, lty=3)
-
-			##############################################
-			## LC + Index, DOME SELECTIVITY - LOW DOME DEFAULT
-			##############################################
-			lowdome_lcindex_default <- file.path(sdome_lcindex, "low_dome_default")
-			dir.create(lowdome_lcindex_default, showWarnings=FALSE)	
-
-				## run models
-				res <- run_LIME(modpath=lowdome_lcindex_default, write=TRUE, lh=plist, input_data=input_data, est_sigma="log_sigma_R", data_avail="Index_LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2), S_l_input=plist_lowdome$S_l)
-				
-				Report <- readRDS(file.path(lowdome_lcindex_default, "Report.rds"))
-				Sdreport <- readRDS(file.path(lowdome_lcindex_default, "Sdreport.rds"))
-				Inputs <- readRDS(file.path(lowdome_lcindex_default, "Inputs.rds"))
-
-				png(file.path(lowdome_lcindex_default, "output.png"), width=16, height=10, res=200, units="in")
-				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()				
-
-				png(file.path(lowdome_lcindex_default, "LCfits.png"), width=16, height=10, res=200, units="in")
-				plot_LC(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()
-
-			##############################################
-			## LC + Index, DOME SELECTIVITY - HIGH DOME DEFAULT
-			##############################################
-			highdome_lcindex_default <- file.path(sdome_lcindex, "high_dome_default")
-			dir.create(highdome_lcindex_default, showWarnings=FALSE)	
-
-				## run models
-				res <- run_LIME(modpath=highdome_lcindex_default, write=TRUE, lh=plist, input_data=input_data, est_sigma="log_sigma_R", data_avail="Index_LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2), S_l_input=plist_highdome$S_l)
-				
-				Report <- readRDS(file.path(highdome_lcindex_default, "Report.rds"))
-				Sdreport <- readRDS(file.path(highdome_lcindex_default, "Sdreport.rds"))
-				Inputs <- readRDS(file.path(highdome_lcindex_default, "Inputs.rds"))
-
-				png(file.path(highdome_lcindex_default, "output.png"), width=16, height=10, res=200, units="in")
-				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()				
-
-				png(file.path(highdome_lcindex_default, "LCfits.png"), width=16, height=10, res=200, units="in")
-				plot_LC(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data$LF), LBSPR=lbspr_res)
-				dev.off()
