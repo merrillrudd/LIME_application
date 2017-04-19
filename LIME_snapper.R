@@ -94,49 +94,49 @@ input_data_up_q <- list("years"=quarters_t, "LF"=LCq_up)
 out <- file.path(res_dir, "LBSPR_LCy")
 dir.create(out, showWarnings=FALSE)
 
-	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_y, rewrite=TRUE, simulation=FALSE)	
+	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_y, rewrite=FALSE, simulation=FALSE)	
 	lbspr_res <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 ## annual LBPSR
 out <- file.path(res_dir, "LBSPR_LCy_highN")
 dir.create(out, showWarnings=FALSE)
 
-	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_up, rewrite=TRUE, simulation=FALSE)	
+	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_up, rewrite=FALSE, simulation=FALSE)	
 	lbspr_res_highN <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 ## annual LBPSR
 out <- file.path(res_dir, "LBSPR_LCy_bottomlongline")
 dir.create(out, showWarnings=FALSE)
 
-	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_bline, rewrite=TRUE, simulation=FALSE)	
+	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_bline, rewrite=FALSE, simulation=FALSE)	
 	lbspr_res_bl <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 ## quarterly LBPSR
 out <- file.path(res_dir, "LBSPR_LCq")
 dir.create(out, showWarnings=FALSE)
 
-	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_q, rewrite=TRUE, simulation=FALSE)	
+	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_q, rewrite=FALSE, simulation=FALSE)	
 	lbspr_res_q <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 ## quarterly LBPSR
 out <- file.path(res_dir, "LBSPR_LCq_highN")
 dir.create(out, showWarnings=FALSE)
 
-	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_up_q, rewrite=TRUE, simulation=FALSE)	
+	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_up_q, rewrite=FALSE, simulation=FALSE)	
 	lbspr_res_highN_q <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 ## quarterly LBPSR
 out <- file.path(res_dir, "LBSPR_LCq_bottomlongline")
 dir.create(out, showWarnings=FALSE)
 
-	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_bline_q, rewrite=TRUE, simulation=FALSE)	
+	run <- run_LBSPR(modpath=out, lh=plist, species="x", input_data=input_data_bline_q, rewrite=FALSE, simulation=FALSE)	
 	lbspr_res_bl_q <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 ## annual LIME
 out <- file.path(res_dir, "LCy")
 dir.create(out, showWarnings=FALSE)
 
-			res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.7,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+			res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.7,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 
 			df <- readRDS(file.path(out, "check_convergence.rds"))
 			Report <- readRDS(file.path(out, "Report.rds"))
@@ -155,7 +155,7 @@ dir.create(out, showWarnings=FALSE)
 out <- file.path(res_dir, "LCq")
 dir.create(out, showWarnings=FALSE)
 
-			res <- run_LIME(modpath=out, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.2,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+			res <- run_LIME(modpath=out, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.2,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 
 			df <- readRDS(file.path(out, "check_convergence.rds"))
 			Report <- readRDS(file.path(out, "Report.rds"))
@@ -175,7 +175,7 @@ dir.create(out, showWarnings=FALSE)
 out <- file.path(res_dir, "LCq_bottomlongline")
 dir.create(out, showWarnings=FALSE)
 
-				res <- run_LIME(modpath=out, lh=plist_q, input_data=input_data_bline_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.7,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+				res <- run_LIME(modpath=out, lh=plist_q, input_data=input_data_bline_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.7,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 
 			df <- readRDS(file.path(out, "check_convergence.rds"))
 			Report <- readRDS(file.path(out, "Report.rds"))
@@ -194,7 +194,7 @@ dir.create(out, showWarnings=FALSE)
 out <- file.path(res_dir, "LCy_highN")
 dir.create(out, showWarnings=FALSE)
 
-				res <- run_LIME(modpath=out, lh=plist, input_data=input_data_up, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.7,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+				res <- run_LIME(modpath=out, lh=plist, input_data=input_data_up, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.7,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 
 			df <- readRDS(file.path(out, "check_convergence.rds"))
 			Report <- readRDS(file.path(out, "Report.rds"))
@@ -213,7 +213,7 @@ dir.create(out, showWarnings=FALSE)
 out <- file.path(res_dir, "LCq_highN")
 dir.create(out, showWarnings=FALSE)
 
-				res <- run_LIME(modpath=out, lh=plist_q, input_data=input_data_up_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.2,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+				res <- run_LIME(modpath=out, lh=plist_q, input_data=input_data_up_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.2,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 
 			df <- readRDS(file.path(out, "check_convergence.rds"))
 			Report <- readRDS(file.path(out, "Report.rds"))
@@ -266,7 +266,7 @@ for(i in 1:length(linf_vec)){
 	out2 <- file.path(out, i)
 	dir.create(out2, showWarnings=FALSE)
 
-	res <- run_LIME(modpath=out2, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","linf"), val_adjust=c(0.2,0.2,linf_vec[i]), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+	res <- run_LIME(modpath=out2, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","linf"), val_adjust=c(0.2,0.2,linf_vec[i]), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 }
 rep1 <- readRDS(file.path(res_dir, "LCq", "Report.rds"))
 linf_like <- rep(NA, length(linf_vec))
@@ -287,7 +287,7 @@ for(i in 1:length(vbk_vec)){
 	out2 <- file.path(out, i)
 	dir.create(out2, showWarnings=FALSE)
 
-	res <- run_LIME(modpath=out2, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","vbk"), val_adjust=c(0.2,0.2,vbk_vec[i]), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+	res <- run_LIME(modpath=out2, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","vbk"), val_adjust=c(0.2,0.2,vbk_vec[i]), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 }
 rep1 <- readRDS(file.path(res_dir, "LCq", "Report.rds"))
 vbk_like <- rep(NA, length(vbk_vec))
@@ -308,7 +308,7 @@ for(i in 1:length(M_vec)){
 	out2 <- file.path(out, i)
 	dir.create(out2, showWarnings=FALSE)
 
-	res <- run_LIME(modpath=out2, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","M"), val_adjust=c(0.2,0.2,M_vec[i]), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+	res <- run_LIME(modpath=out2, lh=plist_q, input_data=input_data_q, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","M"), val_adjust=c(0.2,0.2,M_vec[i]), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 }
 rep1 <- readRDS(file.path(res_dir, "LCq", "Report.rds"))
 M_like <- rep(NA, length(M_vec))
