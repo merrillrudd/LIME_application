@@ -1,4 +1,4 @@
-plot_output <- function(all_years, lc_years, Inputs, Report, Sdreport, LBSPR=NULL, lh, true_years){
+plot_output <- function(all_years, lc_years, Inputs, Report, Sdreport, LBSPR=NULL, lh, true_years, True=NULL){
 
 if(Inputs$Data$n_s==1){
   xY <- seq_along(all_years)
@@ -26,6 +26,7 @@ ilab <- which(true_years %in% lab)
   axis(1, cex.axis=2, at=ilab, labels=lab)
   abline(h=F40*Inputs$Data$n_s, lwd=2, lty=2)
   abline(h=F30*Inputs$Data$n_s, lwd=2, lty=3)
+if(all(is.null(True))==FALSE) lines(True$F_t, lwd=2)
 
 plot(x=seq_along(all_years), y=Report$R_t, lwd=2, col="blue", ylim=c(0, max(Report$R_t)*1.5), type="l", xaxt="n", ylab="Recruitment", xlab="Year", xaxs="i", yaxs="i", cex.axis=2, cex.lab=2)
 points(x=which(all_years %in% lc_years), y=Report$R_t[which(all_years %in% lc_years)], col="blue", pch=19, xpd=NA)
@@ -39,6 +40,10 @@ ilab2 <- sapply(1:length(ilab), function(x){
   return(sub[length(sub)])
 })
 axis(1, cex.axis=2, at=ilab2, labels=lab)
+if(all(is.null(True))==FALSE){
+  par(new=TRUE)
+  plot(True$R_t, xaxs="i", yaxs="i", xlab="", ylab="", ylim=c(0, max(Report$R_t)*1.5), xaxt="n", yaxt="n", lwd=2, type="l")
+}
 
 plot(x=seq_along(all_years), y=Report$SPR_t, lwd=2, col="blue", ylim=c(0, 1), type="l", xaxt="n", ylab="SPR", xlab="Year", xaxs="i", yaxs="i", cex.axis=2, cex.lab=2)
 points(x=which(all_years %in% lc_years), y=Report$SPR_t[which(all_years%in%lc_years)], col="blue", pch=19, xpd=NA)
@@ -52,10 +57,16 @@ if(all(is.null(LBSPR))==FALSE){
   par(new=TRUE)
   plot(LBSPR$SPR, xaxs="i", yaxs="i", xlab="", ylab="", ylim=c(0, 1), xaxt="n", yaxt="n", lwd=2, col="red", type="l")
   points(x=xLC, LBSPR$SPR[xLC], col="red", pch=19)
+  index <- which(is.na(LBSPR$SPR_Var)==FALSE)
+  y <- c( LBSPR$SPR[index]-1.96*sqrt(LBSPR$SPR_Var[index]), rev(LBSPR$SPR[index]+1.96*sqrt(LBSPR$SPR_Var[index])))
+  polygon(y=y, x=c(which(is.na(LBSPR$SPR_Var)==FALSE), rev(which(is.na(LBSPR$SPR_Var)==FALSE))), col=rgb(1,0,0,alpha=0.2), border=NA)
 }
   abline(h=0.4, lwd=2, lty=2)
   abline(h=0.3, lwd=2, lty=3)
-
+if(all(is.null(True))==FALSE){
+    par(new=TRUE)
+  plot(True$SPR_t, xaxs="i", yaxs="i", xlab="", ylab="", ylim=c(0, 1), xaxt="n", yaxt="n", lwd=2, type="l")
+}
 
 plot(x=seq_along(all_years), y=Report$L_t_hat, lwd=2, col="blue", ylim=c(0, max(Report$L_t_hat)*1.5), type="l", xaxt="n", ylab="Mean length", xlab="Year", xaxs="i", yaxs="i", cex.axis=2, cex.lab=2)
 points(x=which(all_years %in% lc_years), y=Report$L_t_hat[which(all_years %in% lc_years)], col="blue", pch=19, xpd=NA)
@@ -65,6 +76,10 @@ sd[,2][which(is.na(sd[,2]))] <- 0
   polygon( y=read_sdreport(sd, log=FALSE), x=c(which(is.na(sd[,2])==FALSE), rev(which(is.na(sd[,2])==FALSE))), col=rgb(0,0,1,alpha=0.2), border=NA)
 }
 axis(1, cex.axis=2, at=ilab2, labels=lab)
+if(all(is.null(True))==FALSE){
+  par(new=TRUE)
+  plot(True$ML_t, , xaxs="i", yaxs="i", xlab="", ylab="", ylim=c(0, max(Report$L_t_hat)*1.5), xaxt="n", yaxt="n", lwd=2, type="l")
+}
 
 plot(x=seq_along(all_years), y=Report$D_t, lwd=2, col="blue", ylim=c(0, max(Report$D_t)*1.5), type="l", xaxt="n", ylab="Relative spawning biomass", xlab="Year", xaxs="i", yaxs="i", cex.axis=2, cex.lab=2)
 points(x=which(all_years %in% lc_years), y=Report$D_t[which(all_years %in% lc_years)], col="blue", pch=19, xpd=NA)
@@ -74,6 +89,10 @@ sd[,2][which(is.na(sd[,2]))] <- 0
   polygon( y=read_sdreport(sd, log=TRUE), x=c(which(is.na(sd[,2])==FALSE), rev(which(is.na(sd[,2])==FALSE))), col=rgb(0,0,1,alpha=0.2), border=NA)
 }
 axis(1, cex.axis=2, at=ilab2, labels=lab)
+if(all(is.null(True))==FALSE){
+    par(new=TRUE)
+  plot(True$D_t, , xaxs="i", yaxs="i", xlab="", ylab="", ylim=c(0, max(Report$D_t)*1.5), xaxt="n", yaxt="n", lwd=2, type="l")
+}
   
   mids <- seq(Inputs$Data$binwidth, by=Inputs$Data$binwidth, length.out=ncol(Inputs$Data$LF))
   plot(x=1:length(mids), y=Report$S_l, lwd=2, col="blue", ylim=c(0, 1.1), type="l", xaxt="n", ylab="Selectivity at length", xlab="Length (cm)", xaxs="i", yaxs="i", cex.axis=2, cex.lab=2)
@@ -88,6 +107,6 @@ if(all(is.na(Sdreport))==FALSE)  polygon( y=read_sdreport(summary(Sdreport)[whic
     }
   }
   legend("bottomright", col=c("blue", "red", "black", "black"), lwd=2, legend=c("LIME", "LB-SPR", "SPR 40%", "SPR 30%"), cex=1.7, lty=c(1,1,2,3))
-
+  if(all(is.null(True))==FALSE) lines(True$S_l, lwd=2)
 
 }

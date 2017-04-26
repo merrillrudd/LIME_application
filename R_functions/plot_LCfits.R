@@ -1,4 +1,4 @@
-plot_LCfits <- function(Inputs, Inputs2=NULL, Inputs3=NULL, Inputs4=NULL, Report=NULL, Report2=NULL, LBSPR=NULL, true_lc_years=NULL, ylim=NULL){
+plot_LCfits <- function(Inputs, Inputs2=NULL, Inputs3=NULL, Inputs4=NULL, Report=NULL, Report2=NULL, LBSPR=NULL, true_lc_years=NULL, ylim=NULL, ML50=NULL, SL50=NULL){
 	# dev.new()
 
 	obs <- Inputs$LF
@@ -36,7 +36,7 @@ plot_LCfits <- function(Inputs, Inputs2=NULL, Inputs3=NULL, Inputs4=NULL, Report
 	if(all(is.null(LBSPR))==FALSE) pred2 <- t(LBSPR$pLF)
 	if(all(is.null(LBSPR))) pred2 <- NULL
 
-	par(mfrow=dim, mar=c(0,0,0,0), omi=c(1,1,1,1))
+	par(mfcol=dim, mar=c(0,0,0,0), omi=c(1,1,1,1))
 
 	# find_max <- 0
 	# for(i in 1:length(lc_years)){
@@ -53,8 +53,8 @@ plot_LCfits <- function(Inputs, Inputs2=NULL, Inputs3=NULL, Inputs4=NULL, Report
 	for(i in 1:length(lc_years)){
 		yr <- lc_years[i]
 		barplot(obs[which(lc_years==yr),]/sum(obs[which(lc_years==yr),]), xaxs="i", yaxs="i", xaxt="n", yaxt="n", ylim=ylim, col="#22222250", border=NA, space=0)
-		lines(pred[which(Tyrs==yr),], col="blue", lwd=2)
-		lines(pred2[which(lc_years==yr),], col="red", lwd=2)
+		lines(pred[which(Tyrs==yr),], col="blue", lwd=4)
+		lines(pred2[which(lc_years==yr),], col="red", lwd=4)
 		box()
 		if(all(is.null(Inputs2))==FALSE){
 			par(new=TRUE)
@@ -69,15 +69,19 @@ plot_LCfits <- function(Inputs, Inputs2=NULL, Inputs3=NULL, Inputs4=NULL, Report
 			barplot(obs4[which(lc_years2==yr),]/sum(obs4[which(lc_years2==yr),]), border=NA, space=0, col="#00DD0050", xaxs="i", yaxs="i", xaxt="n", yaxt="n", ylim=ylim)
 		}
 
-		if(i %in% (length(lc_years)-dim[2]+1):length(lc_years)) axis(1, at=pretty(seq_along(lbhighs)), labels=pretty(as.numeric(lbhighs)), cex.axis=2)
-		if(i %in% seq(1,length(lc_years), by=dim[2])) axis(2, at=pretty(ylim), las=2, cex.axis=2)
+		if(i %in% seq(dim[2],length(lc_years), by=dim[1])) axis(1, at=pretty(seq_along(lbhighs)), labels=pretty(as.numeric(lbhighs)), cex.axis=2)
+		if(i %in% 1:dim[2]) axis(2, at=pretty(ylim), las=2, cex.axis=2)
 		if(all(is.null(true_lc_years))==FALSE & length(true_lc_years)!=length(lc_years)){
 			text(x=0.2*max(seq_along(lbhighs)), y=0.9*ylim[2], lc_years[i], font=2, cex=2)
 			warning("Input years for length composition data do not match number of years in analysis")
 		}
 		if(all(is.null(true_lc_years))) text(x=0.2*max(seq_along(lbhighs)), y=0.9*ylim[2], lc_years[i], font=2, cex=2)
 		if(all(is.null(true_lc_years))==FALSE) text(x=0.2*max(seq_along(lbhighs)), y=0.9*ylim[2], true_lc_years[i], font=2, cex=2)
-		if(all(is.null(Report))==FALSE) abline(v=Report$S50, lty=2)
+		if(all(is.null(SL50))==FALSE){
+			if(length(SL50)==1) abline(v=SL50, lty=2, lwd=2)
+			if(length(SL50)>1) abline(v=SL50[i], lty=2, lwd=2)
+		}
+		if(all(is.null(ML50))==FALSE) abline(v=ML50, col="orange", lty=2, lwd=2)
 	}
 	mtext(side=1, "Length bin (cm)", outer=TRUE, line=4, cex=1.5)
 	mtext(side=2, "Proportion", outer=TRUE, line=5, cex=1.5)

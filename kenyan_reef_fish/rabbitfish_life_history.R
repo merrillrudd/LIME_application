@@ -1,5 +1,7 @@
 rm(list=ls())
 library(LIME)
+library(msm)
+
 
 main_dir <- "C:\\Git_Projects\\LIME_application"
 init_dir <- file.path(main_dir, "kenyan_reef_fish")
@@ -64,9 +66,9 @@ abline(v=M_toUse, lwd=2)
 
 ## add life history information for species chosen for assessment
 ## siganus sutor
-plist <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=11.0, S95=15, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=1)
-plist_q <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=11.0, S95=15, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=4, binwidth=1)
-plist_m <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=11.0, S95=15, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=12, binwidth=1)
+plist <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=11.0, S95=15, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=NULL, CVlen=0.1, nseasons=1, binwidth=1)
+plist_q <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=11.0, S95=15, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=NULL, CVlen=0.1, nseasons=4, binwidth=1)
+plist_m <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=11.0, S95=15, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=NULL, CVlen=0.1, nseasons=12, binwidth=1)
 
 
 saveRDS(plist, file.path(data_dir, "Siganus_sutor_life_history_annual.rds"))

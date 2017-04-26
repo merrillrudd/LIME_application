@@ -41,6 +41,12 @@ dir.create(stock_dir, showWarnings=FALSE)
 fig_dir <- file.path(stock_dir, "figures")
 dir.create(fig_dir, showWarnings=FALSE)
 
+######################################
+## Species life history
+######################################
+
+plist <- readRDS(file.path(data_dir, "Siganus_sutor_life_history_annual.rds"))
+plist_m <- readRDS(file.path(data_dir, "Siganus_sutor_life_history_monthly.rds"))
 
 ## data to be used for the assessment
 data <- alldata[which(alldata$Name %in% name),]
@@ -331,8 +337,9 @@ saveRDS(LCm, file.path(data_dir, "Siganus_sutor_LCraw_monthly.rds"))
 saveRDS(lc_weight, file.path(data_dir, "Siganus_sutor_LC_weighted.rds"))
 saveRDS(lc_weight_mo, file.path(data_dir, "Siganus_sutor_LCmonthly_weighted.rds"))
 saveRDS(LCm_bt, file.path(data_dir, "Siganus_sutor_LCmonthly_baskettrap.rds"))
+saveRDS(LC_bt, file.path(data_dir, "Siganus_sutor_LC_baskettrap.rds"))
 saveRDS(lc_weight_mo[which(rownames(lc_weight_mo) %in% months_up),], file.path(data_dir, "Siganus_sutor_LCmonthly_weighted_Nup.rds"))
-
+saveRDS(lc_weight[which(rownames(lc_weight) %in% years_up),], file.path(data_dir, "Siganus_sutor_LC_weighted_Nup.rds"))
 
 
 

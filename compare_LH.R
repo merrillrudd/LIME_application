@@ -31,7 +31,7 @@ plba <- age_length(highs=plist_snap$highs, lows=plist_snap$lows, L_a=plist_snap$
 col_vec <- rgb( ramp(seq(0, 1, length = nrow(plba))), max = 255)
 matplot(t(plba), type="l", lty=1, lwd=3, col=col_vec, cex.axis=2, xaxs="i", yaxs="i", ylim=c(0, 0.5), xaxt="n")
 print.letter(xy=c(0.9,0.9), "(a)", cex=2)
-mtext(side=2, "Snapper", line=6, cex=2.5)
+mtext(side=2, expression(italic("Lutjanus guttatus")), line=6, cex=2.5)
 mtext(side=3, "Annual time-step", line=1, cex=2.5)
 
 plba <- age_length(highs=plist_q_snap$highs, lows=plist_q_snap$lows, L_a=plist_q_snap$L_a, CVlen=0.1)
@@ -50,7 +50,7 @@ plba <- age_length(highs=plist_rab$highs, lows=plist_rab$lows, L_a=plist_rab$L_a
 col_vec <- rgb( ramp(seq(0, 1, length = nrow(plba))), max = 255)
 matplot(t(plba), type="l", lty=1, lwd=3, col=col_vec, cex.axis=2, xaxs="i", yaxs="i", ylim=c(0, 0.5))
 print.letter(xy=c(0.9,0.9), "(d)", cex=2)
-mtext(side=2, "Rabbitfish", line=6, cex=2.5)
+mtext(side=2, expression(italic("Siganus sutor")), line=6, cex=2.5)
 
 plba <- age_length(highs=plist_q_rab$highs, lows=plist_q_rab$lows, L_a=plist_q_rab$L_a, CVlen=0.1)
 col_vec <- rgb( ramp(seq(0, 1, length = nrow(plba))), max = 255)
@@ -63,7 +63,7 @@ matplot(t(plba), type="l", lty=1, lwd=3, col=col_vec, yaxt="n", cex.axis=2, xaxs
 print.letter(xy=c(0.9,0.9), "(f)", cex=2)
 
 
-mtext(side=2, "Probability of being an age", outer=TRUE, line=3, cex=2)
+mtext(side=2, "Probability of being an length given age", outer=TRUE, line=3, cex=2)
 mtext(side=1, "Length (cm)", outer=TRUE, line=3, cex=2)
 
 dev.off()

@@ -32,7 +32,9 @@ run_LBSPR <- function(modpath, lh, input_data=NULL, itervec=NULL, species=NULL, 
       input_data <- list("years"=1:sim$Nyears, "LF"=sim$LF, "obs_per_year"=sim$obs_per_year)
     }
 
-    inits <- create_inputs(lh=lh, input_data=input_data, param="h", val=0.99)
+    lh[["h"]] <- 0.99
+
+    inits <- create_inputs(lh=lh, input_data=input_data)
     Nyears <- inits$Nyears 
     Nyears_comp <- nrow(inits$LF)
 
@@ -73,6 +75,10 @@ run_LBSPR <- function(modpath, lh, input_data=NULL, itervec=NULL, species=NULL, 
           LBSPR_outs$SL95 <- lbspr_res@Ests[,"SL95"]
           LBSPR_outs$FM <- lbspr_res@Ests[,"FM"]
           LBSPR_outs$SPR <- lbspr_res@Ests[,"SPR"]
+          LBSPR_outs$SPR_Var <- lbspr_res@Vars[,"SPR"]
+          LBSPR_outs$SL50_Var <- lbspr_res@Vars[,"SL50"]
+          LBSPR_outs$SL95_Var <- lbspr_res@Vars[,"SL95"]
+          LBSPR_outs$FM_Var <- lbspr_res@Vars[,"FM"]
           if(is.null(modpath)==FALSE) saveRDS(LBSPR_outs, file.path(iterpath, "LBSPR_results.rds"))
         }
         if(isS4(lbspr_res)==FALSE){
