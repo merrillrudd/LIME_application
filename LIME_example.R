@@ -13,7 +13,7 @@ library(rfishbase)
 ###################################
 ## Directories
 ###################################
-main_dir <- "C:\\Git_Projects\\LIME_application"
+main_dir <- "C:\\merrill\\LIME_application"
 
 R_dir <- file.path(main_dir, "R_functions")
 funs <- list.files(R_dir)
@@ -80,13 +80,13 @@ plot(plist$S_l, type="l", lwd=3)
 ###################################
 ## Load data
 ###################################
-example_data <- generate_data(modpath=data_dir, data_avail="LC10", Fdynamics="Ramp", Rdynamics="AR", lh=plist, write=FALSE, Nyears=10, comp_sample=200, rewrite=TRUE, init_depl=0.6, itervec=1)
+example_data <- generate_data(modpath=NULL, Fdynamics="Ramp", Rdynamics="AR", lh=plist, Nyears=10, Nyears_comp=10, comp_sample=200, rewrite=TRUE, init_depl=0.6, itervec=1)
 saveRDS(example_data, file.path(data_dir, "example_data.rds"))
 
 example_data <- readRDS(file.path(data_dir, "example_data.rds"))
 
 LC <- example_data$LF
-plot_LC(Inputs=list("LF"=LC))
+plot_LCfits(Inputs=list("LF"=LC), dim=c(4,3))
 
 ###################################
 ## Run assessments
@@ -110,8 +110,8 @@ input_data <- list("years"=years_t, "LF"=LC)
 		allyears_lbspr <- file.path(allyears_dir, "LBSPR")
 		dir.create(allyears_lbspr, showWarnings=FALSE)
 
-		run <- run_LBSPR(modpath=allyears_lbspr, lh=plist, species=stock_name, input_data=input_data, rewrite=TRUE, simulation=FALSE, write=TRUE)	
-		lbspr_res <- readRDS(file.path(allyears_lbspr, "LBSPR_results.rds"))
+		run <- run_LBSPR(modpath=allyears_lbspr, lh=plist, species=stock_name, input_data=input_data, rewrite=TRUE, simulation=FALSE)	
+		lbspr_res <- readRDS(file.path(allyears_lbspr, "LBSPR_raw_res.rds"))
 
 		####################################
 		## ALL YEARS, LOGISTIC SELECTIVITY
@@ -126,15 +126,15 @@ input_data <- list("years"=years_t, "LF"=LC)
 			dir.create(slogis_allyears_default, showWarnings=FALSE)	
 
 				## run models
-				res <- run_LIME(modpath=slogis_allyears_default, write=TRUE, lh=plist, input_data=input_data, est_sigma="log_sigma_R", data_avail="LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2))
+				res <- run_LIME(modpath=slogis_allyears_default,  lh=plist, input_data=input_data, est_sigma="log_sigma_R", data_avail="LC", LFdist=1, simulation=FALSE, rewrite=TRUE, param_adjust=c("SigmaR","SigmaF"), val_adjust=c(0.7,0.2))
 				
 				Report <- readRDS(file.path(slogis_allyears_default, "Report.rds"))
 				Sdreport <- readRDS(file.path(slogis_allyears_default, "Sdreport.rds"))
 				Inputs <- readRDS(file.path(slogis_allyears_default, "Inputs.rds"))
 
 				png(file.path(slogis_allyears_default, "output.png"), width=16, height=10, res=200, units="in")
-				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), LBSPR=lbspr_res, True=example_data)
-				dev.off()				
+				plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data$years, lc_years=rownames(input_data$LF), true_years=input_data$years, LBSPR=lbspr_res, True=example_data, lh=plist, set_ylim=list("Fish" = c(0,1)))
+				dev.off()			
 
 				png(file.path(slogis_allyears_default, "LCfits.png"), width=16, height=10, res=200, units="in")
 				plot_LC(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data$LF), LBSPR=lbspr_res)

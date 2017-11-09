@@ -1,6 +1,7 @@
 rm(list=ls())
 
 ## load LIME package
+devtools::install_github("kaskr/TMB_contrib_R/TMBhelper")
 devtools::install_github("merrillrudd/LIME", build.vignettes=TRUE, dependencies=TRUE)
 library(LIME)
 
@@ -16,7 +17,7 @@ library(gplots)
 ###################################
 ## Directories
 ###################################
-main_dir <- "C:\\Git_Projects\\LIME_application"
+main_dir <- "C:\\merrill\\LIME_application"
 
 R_dir <- file.path(main_dir, "R_functions")
 funs <- list.files(R_dir)

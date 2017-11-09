@@ -1,8 +1,9 @@
 rm(list=ls())
 library(LIME)
+library(FishLife)
 library(msm)
 
-main_dir <- "C:\\Git_Projects\\LIME_application"
+main_dir <- "C:\\merrill\\LIME_application"
 init_dir <- file.path(main_dir, "costa_rican_snapper")
 data_dir <- file.path(init_dir, "data")
 
@@ -18,6 +19,12 @@ lwa_toUse <- 0.0245
 lwb_toUse <- 2.790
 M_init <- 0.43
 ML50_toUse <- 34
+
+## FishLife
+Predict <- Plot_taxa(Search_species(Genus = "Lutjanus", Species = "guttatus")$match_taxonomy, mfrow=c(2,2))
+pred <- exp(Predict[[1]]$Mean_pred)
+var <- Predict[[1]]$Cov_pred
+
 
 ## check fishbase and natural mortality toolfor life history distributions
 proper_name <- "Lutjanus guttatus"

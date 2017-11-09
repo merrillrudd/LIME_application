@@ -7,13 +7,14 @@ library(LIME)
 ## load LBSPR package
 library(LBSPR)
 
-## load Rfishbase
-library(rfishbase)
+## load FishLife
+devtools::install_github("james-thorson/FishLife")
+library(FishLife)
 
 ###################################
 ## Directories
 ###################################
-main_dir <- "C:\\Git_Projects\\LIME_application"
+main_dir <- "C:\\merrill\\LIME_application"
 
 R_dir <- file.path(main_dir, "R_functions")
 funs <- list.files(R_dir)

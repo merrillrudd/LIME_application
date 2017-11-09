@@ -66,7 +66,7 @@ run_LBSPR <- function(modpath, lh, input_data=NULL, itervec=NULL, species=NULL, 
         # lbspr_res <- LBSPRfit(LB_pars=LB_pars, LB_lengths=LB_lengths, yrs=NA, Control=list(modtype="GTG"))        
         lbspr_res <- tryCatch(LBSPRfit(LB_pars=LB_pars, LB_lengths=LB_lengths, yrs=NA, Control=list(modtype="absel")), error=function(e) NA)
         # lbspr_res <- tryCatch(LBSPRfit(LB_pars=LB_pars, LB_lengths=LB_lengths, yrs=NA, Control=list(modtype="GTG")), error=function(e) NA)
-
+        saveRDS(lbspr_res, file.path(iterpath, "LBSPR_raw_res.rds"))
 
         if(isS4(lbspr_res)){
           LBSPR_outs <- list()
