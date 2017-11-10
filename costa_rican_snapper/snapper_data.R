@@ -1,12 +1,14 @@
 rm(list=ls())
 library(LIME)
 library(tidyr)
+library(dplyr)
+library(purrrlyr)
 
 ###################################
 ## Directories
 ###################################
 
-main_dir <- "C:\\Git_Projects\\LIME_application"
+main_dir <- "C:\\merrill\\LIME_application"
 Rmain_dir <- file.path(main_dir, "R_functions")
 funs <- list.files(Rmain_dir)
 ignore <- sapply(1:length(funs), function(x) source(file.path(Rmain_dir, funs[x])))
@@ -33,8 +35,7 @@ plist_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly.rds"))
 ###############################
 ## length composition data
 ###############################
-# data_raw <- read.csv(file.path(data_dir, "cr_snapper_database.csv"), 
-# 	stringsAsFactors=FALSE)
+# data_raw <- read.csv(file.path(data_dir, "cr_snapper_database.csv"), stringsAsFactors=FALSE)
 
 # data_raw$Year <- sapply(1:nrow(data_raw), function(x) adjust_date(data_raw$Date[x], out="year"))
 # data_raw$Month <- sapply(1:nrow(data_raw), function(x) adjust_date(data_raw$Date[x], out="month"))
@@ -43,10 +44,9 @@ plist_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly.rds"))
 # 	data_raw$W_g[which(data_raw$W_g==0)] <- NA
 # data_raw$W_kg <- data_raw$W_g/1000
 
-
-#############################
-## subset Lutjanus guttatus
-#############################
+# #############################
+# ## subset Lutjanus guttatus
+# #############################
 
 # data <- data_raw[which(data_raw$Species=="Lutjanus guttatus" & data_raw$Year>1950),]
 # write.csv(data, file.path(data_dir, "cr_snapper_filtered.csv"))
@@ -540,22 +540,23 @@ saveRDS(lc_weight_qu[which(quobs %in% quarters_up),], file.path(data_dir, "Lutja
 
 
 ## gears separate
-saveRDS(lc_gear[["Bottom Longline"]], file.path(data_dir, "Lutjanus_guttatus_LF_g1.rds"))
-saveRDS(lc_gear_quarter[["Bottom Longline"]], file.path(data_dir, "Lutjanus_guttatus_LF_g1_quarterly.rds"))
+saveRDS(lc_gear[["Bottom Longline"]], file.path(data_dir, "Lutjanus_guttatus_LF_bottomlongline.rds"))
+saveRDS(lc_gear_quarter[["Bottom Longline"]], file.path(data_dir, "Lutjanus_guttatus_LF_bottomlongline_quarterly.rds"))
 
-saveRDS(lc_gear[["Gillnet"]], file.path(data_dir, "Lutjanus_guttatus_LF_g2.rds"))
+saveRDS(lc_gear[["Gillnet"]], file.path(data_dir, "Lutjanus_guttatus_LF_gillnet.rds"))
+saveRDS(lc_gear_quarter[["Gillnet"]], file.path(data_dir, "Lutjanus_guttatus_LF_gillnet_quarterly.rds"))
 
 ## matrix with samples per  gear each year
 saveRDS(gearmat, file.path(data_dir, "Samples_per_gear.rds"))
 
 lc_list <- list("LF"=LCprop)
-plot_LCdata(lc_list=lc_list, lc_years=years, gears=gears)
+plot_LCfits(Inputs=lc_list)
 
 lc_list <- list("LF"=lc_weight)
 plot_LCdata(lc_list=lc_list, lc_years=years, gears=gears)
 
 plot_LCfits(Inputs=list("LF"=LCprop), Inputs2=list("LF"=lc_weight))
-
+plot_LCfits(Inputs=list("LF"=lc_gear[["Bottom Longline"]]/rowSums(lc_gear[["Bottom Longline"]])), Inputs2=list("LF"=lc_gear[["Gillnet"]]/rowSums(lc_gear[["Gillnet"]])))
 
 
 #############################
