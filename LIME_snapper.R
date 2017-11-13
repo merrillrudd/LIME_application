@@ -5,6 +5,7 @@ devtools::install_github("merrillrudd/LIME", build.vignettes=TRUE, dependencies=
 library(LIME)
 
 ## load LBSPR package
+devtools::install_github("adrianhordyk/LBSPR", build.vignettes=TRUE, dependencies=TRUE)
 library(LBSPR)
 
 ## load FishLife
@@ -50,47 +51,61 @@ plist_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly.rds"))
 ## Load data
 ###################################
 
-## read nominal CPUE Index
-I_t <- readRDS(file.path(data_dir, "Nominal_CPUE.rds"))
-
-## read weighted data
-LCprop <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LFprop_weighted.rds"))
-LC <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_weighted.rds"))
-bins <- as.numeric(colnames(LC))
-
-LCq <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_weighted_quarterly.rds"))
-
-## weighted data by gear
-LCprop_bygear <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LFprop_gear_year.rds"))
-gearmat <- readRDS(file.path(data_dir, "Samples_per_gear.rds"))
-gears <- colnames(gearmat)
-
-LCup <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_weighted_Nup.rds"))
-LCq_up <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LFquarterly_weighted_Nup.rds"))
-
 ## LC separate by gears
-LC_bline <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_g1.rds"))
-LCq_bline <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_g1_quarterly.rds"))
+LC_bline <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_bottomlongline.rds"))
+LCq_bline <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_bottomlongline_quarterly.rds"))
+
+LC_gnet <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_gillnet.rds"))
+LCq_gnet <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_gillnet_quarterly.rds"))
 
 #########################################
 ## run assessments -- life history fixed
 #########################################
 
-years_o <- as.numeric(rownames(LC))
+years_o <- as.numeric(unique(c(rownames(LC_bline), rownames(LC_gnet))))
 years_t <- min(years_o):max(years_o)
 
-quarters_o <- as.numeric(rownames(LCq))
+quarters_o <- as.numeric(unique(c(rownames(LCq_bline), rownames(LCq_gnet))))
 quarters_t <- min(quarters_o):max(quarters_o)
 
 q_all <- as.vector(sapply(1:length(years_t), function(x) rep(years_t[x],4)))
 true_q <- q_all[quarters_o]
 
+
+LC <- array(0, dim=c(length(years_t), ncol(LC_bline), 2))
+rownames(LC) <- years_t
+colnames(LC) <- colnames(LC_bline)
+LC[which(rownames(LC) %in% rownames(LC_bline)),,1] <- LC_bline
+LC[which(rownames(LC) %in% rownames(LC_gnet)),,2] <- LC_gnet
+
+LCq <- array(0, dim=c(length(quarters_t), ncol(LC_bline), 2))
+rownames(LCq) <- quarters_t
+colnames(LCq) <- colnames(LC_bline)
+LCq[which(rownames(LCq) %in% rownames(LCq_bline)),,1] <- LCq_bline
+LCq[which(rownames(LCq) %in% rownames(LCq_gnet)),,2] <- LCq_gnet
+
 input_data_y <- list("years"=years_t, "LF"=LC)
 input_data_q <- list("years"=quarters_t, "LF"=LCq)
-input_data_bline <- list("years"=years_t, "LF"=LC_bline)
-input_data_up <- list("years"=years_t, "LF"=LCup)
-input_data_bline_q <- list("years"=quarters_t, "LF"=LCq_bline[which(rowSums(LCq_bline)>0),])
-input_data_up_q <- list("years"=quarters_t, "LF"=LCq_up)
+
+
+## annual LIME
+out <- file.path(res_dir, "LCy")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	
+	png(file.path(out, "output.png"), width=16, height=10, res=200, units="in")
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data_y$years, lc_years=rownames(input_data_y$LF), LBSPR=lbspr_res, true_years=years_t, lh=plist)
+	dev.off()	
+	
+	png(file.path(out, "LCfits.png"), width=16, height=10, res=200, units="in")
+	plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data_y$LF), LBSPR=lbspr_res, ylim=c(0,0.3))
+	dev.off()
 
 
 ############### weighted length comps ##########################
@@ -129,24 +144,7 @@ plist_new$M <- 0.43
 	lbspr_res_altM <- readRDS(file.path(out, "LBSPR_results.rds"))
 
 
-## annual LIME
-out <- file.path(res_dir, "LCy")
-dir.create(out, showWarnings=FALSE)
 
-			res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
-
-			df <- readRDS(file.path(out, "check_convergence.rds"))
-			Report <- readRDS(file.path(out, "Report.rds"))
-			Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
-			Inputs <- readRDS(file.path(out, "Inputs.rds"))
-
-			png(file.path(out, "output.png"), width=16, height=10, res=200, units="in")
-			plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data_y$years, lc_years=rownames(input_data_y$LF), LBSPR=lbspr_res, true_years=years_t, lh=plist)
-			dev.off()	
-
-			png(file.path(out, "LCfits.png"), width=16, height=10, res=200, units="in")
-			plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data_y$LF), LBSPR=lbspr_res, ylim=c(0,0.3))
-			dev.off()
 
 ## quarterly LIME
 out <- file.path(res_dir, "LCq")
