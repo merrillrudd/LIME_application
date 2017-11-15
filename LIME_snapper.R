@@ -87,12 +87,48 @@ LCq[which(rownames(LCq) %in% rownames(LCq_gnet)),,2] <- LCq_gnet
 input_data_y <- list("years"=years_t, "LF"=LC)
 input_data_q <- list("years"=quarters_t, "LF"=LCq)
 
+# LCtest <- array(0, dim=c(1,ncol(LC[,,1]),1))
+# LCtest[,,1] <- LC[1,,1]
+# rownames(LCtest) <- years_t[1]
+# colnames(LCtest) <- colnames(LC)
+
+# input_data_test <- list("years"=years_t[1], "LF"=LCtest)
+
+src <- "C:\\merrill\\LIME\\src"
+setwd(src)
+dyn.unload("LIME.dll")
+file.remove(paste0("LIME",c(".dll",".o"), sep=""))
+compile("LIME.cpp")
+dyn.load(file.path(src, "LIME.dll"))
 
 ## annual LIME
 out <- file.path(res_dir, "LCy")
 dir.create(out, showWarnings=FALSE)
 
-	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+
+	modpath=out
+	lh=plist
+	input_data=input_data_y
+	est_sigma="log_sigma_R"
+	data_avail="LC"
+	itervec=NULL
+	rewrite=FALSE
+	simulation=FALSE
+	f_true=FALSE
+	C_opt=0
+	LFdist=1
+	param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI")
+	val_adjust=c(0.2,0.737,0.2,0.2)
+	F_up=10
+	S_l_input=-1
+	L_a_input=-1
+	fix_param=FALSE
+	theta_type=1
+	randomR=TRUE
+	SigRpen=1
+	fix_param_t=FALSE
+	iter=1
 
 	df <- readRDS(file.path(out, "check_convergence.rds"))
 	Report <- readRDS(file.path(out, "Report.rds"))
@@ -100,11 +136,11 @@ dir.create(out, showWarnings=FALSE)
 	Inputs <- readRDS(file.path(out, "Inputs.rds"))
 	
 	png(file.path(out, "output.png"), width=16, height=10, res=200, units="in")
-	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data_y$years, lc_years=rownames(input_data_y$LF), LBSPR=lbspr_res, true_years=years_t, lh=plist)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data_y$years, lc_years=rownames(input_data_y$LF), LBSPR=NULL, true_years=years_t, lh=plist)
 	dev.off()	
 	
 	png(file.path(out, "LCfits.png"), width=16, height=10, res=200, units="in")
-	plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data_y$LF), LBSPR=lbspr_res, ylim=c(0,0.3))
+	plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data_y$LF), LBSPR=NULL, ylim=c(0,0.3))
 	dev.off()
 
 
