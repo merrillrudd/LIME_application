@@ -72,13 +72,13 @@ abline(v=M_toUse, lwd=2)
 
 ## add life history information for species chosen for assessment
 ## siganus sutor
-plist <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwa_toUse, S50=32, S95=39, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=1, AgeMax=22)
-plist_q <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwa_toUse, S50=32, S95=39, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=4, binwidth=1, AgeMax=22)
-plist_m <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwa_toUse, S50=32, S95=39, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=12, binwidth=1, AgeMax=22)
+plist <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=32, S95=39, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=1, AgeMax=22)
+plist_q <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=32, S95=39, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=4, binwidth=1, AgeMax=22)
+plist_m <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=32, S95=39, selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=12, binwidth=1, AgeMax=22)
 
-plist2 <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwa_toUse, S50=c(32,40), S95=c(39,45), selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=1, AgeMax=22, nfleets=2)
-plist2_q <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwa_toUse, S50=c(32,40), S95=c(39,45), selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=4, binwidth=1, AgeMax=22, nfleets=2)
-plist2_m <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwa_toUse, S50=c(32,40), S95=c(39,45), selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=12, binwidth=1, AgeMax=22, nfleets=2)
+plist2 <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=c(32,40), S95=c(39,45), selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=1, binwidth=1, AgeMax=22, nfleets=2)
+plist2_q <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=c(32,40), S95=c(39,45), selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=4, binwidth=1, AgeMax=22, nfleets=2)
+plist2_m <- create_lh_list(vbk=vbk_toUse, linf=linf_toUse, lwa=lwa_toUse, lwb=lwb_toUse, S50=c(32,40), S95=c(39,45), selex_input="length", M50=ML50_toUse, maturity_input="length", SigmaR=0.7, SigmaF=0.2, M=M_toUse, F1=0.34, CVlen=0.1, nseasons=12, binwidth=1, AgeMax=22, nfleets=2)
 
 
 saveRDS(plist, file.path(data_dir, "CRSNAP_life_history_annual.rds"))

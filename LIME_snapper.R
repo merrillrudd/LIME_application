@@ -47,6 +47,10 @@ plist <- readRDS(file.path(data_dir, "CRSNAP_life_history_annual.rds"))
 plist_q <- readRDS(file.path(data_dir, "CRSNAP_life_history_quarterly.rds"))
 plist_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly.rds"))
 
+plist2 <- readRDS(file.path(data_dir, "CRSNAP_life_history_annual_2fleets.rds"))
+plist2_q <- readRDS(file.path(data_dir, "CRSNAP_life_history_quarterly_2fleets.rds"))
+plist2_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly_2fleets.rds"))
+
 ###################################
 ## Load data
 ###################################
@@ -105,10 +109,10 @@ dyn.load(file.path(src, "LIME.dll"))
 out <- file.path(res_dir, "LCy")
 dir.create(out, showWarnings=FALSE)
 
-	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
 
 	modpath=out
-	lh=plist
+	lh=plist2
 	input_data=input_data_y
 	est_sigma="log_sigma_R"
 	data_avail="LC"
