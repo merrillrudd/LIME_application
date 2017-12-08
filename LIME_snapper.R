@@ -1,7 +1,7 @@
 rm(list=ls())
 
 ## load LIME package
-devtools::install_github("merrillrudd/LIME", build.vignettes=TRUE, dependencies=TRUE)
+devtools::install_github("merrillrudd/LIME", dependencies=TRUE)
 library(LIME)
 
 ## load LBSPR package
@@ -91,29 +91,33 @@ LCq[which(rownames(LCq) %in% rownames(LCq_gnet)),,2] <- LCq_gnet
 input_data_y <- list("years"=years_t, "LF"=LC)
 input_data_q <- list("years"=quarters_t, "LF"=LCq)
 
-# LCtest <- array(0, dim=c(1,ncol(LC[,,1]),1))
-# LCtest[,,1] <- LC[1,,1]
-# rownames(LCtest) <- years_t[1]
-# colnames(LCtest) <- colnames(LC)
+LCtest <- array(0, dim=c(1,ncol(LC[,,1]),1))
+LCtest[,,1] <- LC[1,,1]
+rownames(LCtest) <- years_t[1]
+colnames(LCtest) <- colnames(LC)
 
-# input_data_test <- list("years"=years_t[1], "LF"=LCtest)
+input_data_test <- list("years"=years_t[1], "LF"=LCtest)
 
-src <- "C:\\merrill\\LIME\\src"
-setwd(src)
-dyn.unload("LIME.dll")
-file.remove(paste0("LIME",c(".dll",".o"), sep=""))
-compile("LIME.cpp")
-dyn.load(file.path(src, "LIME.dll"))
+# src <- "C:\\merrill\\LIME\\src"
+# setwd(src)
+# dyn.unload("LIME.dll")
+# file.remove(paste0("LIME",c(".dll",".o"), sep=""))
+# compile("LIME.cpp")
+# dyn.load(file.path(src, "LIME.dll"))
 
 ## annual LIME
 out <- file.path(res_dir, "LCy")
 dir.create(out, showWarnings=FALSE)
 
-	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, theta_type=1, randomR=TRUE)
+
+#### fit to length data NA for LFdist = 0 and 1
+	# res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE)
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_test, est_sigma="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=0, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE)
+
 
 	modpath=out
-	lh=plist2
-	input_data=input_data_y
+	lh=plist
+	input_data=input_data_test
 	est_sigma="log_sigma_R"
 	data_avail="LC"
 	itervec=NULL
@@ -121,7 +125,7 @@ dir.create(out, showWarnings=FALSE)
 	simulation=FALSE
 	f_true=FALSE
 	C_opt=0
-	LFdist=1
+	LFdist=0
 	param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI")
 	val_adjust=c(0.2,0.737,0.2,0.2)
 	F_up=10
