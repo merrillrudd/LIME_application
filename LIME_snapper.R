@@ -51,6 +51,7 @@ plist_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly.rds"))
 plist2 <- readRDS(file.path(data_dir, "CRSNAP_life_history_annual_2fleets.rds"))
 plist2_q <- readRDS(file.path(data_dir, "CRSNAP_life_history_quarterly_2fleets.rds"))
 plist2_m <- readRDS(file.path(data_dir, "CRSNAP_life_history_monthly_2fleets.rds"))
+plist2$theta <- 1
 
 ###################################
 ## Load data
@@ -64,7 +65,8 @@ LC_gnet <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_gillnet.rds"))
 LCq_gnet <- readRDS(file.path(data_dir, "Lutjanus_guttatus_LF_gillnet_quarterly.rds"))
 
 
-plot_LCfits(Inputs=list("LF"=LC_bline), Inputs2=list("LF"=LC_gnet))
+plot_LCfits(LFlist=list('bottomlongline'=LC_bline, 'gillnet'=LC_gnet))
+
 #########################################
 ## run assessments -- life history fixed
 #########################################
@@ -100,12 +102,14 @@ LC1 <- array(0, dim=c(1,ncol(LC_bline),2))
 LC1[,,1] <- t(as.matrix(LC[nrow(LC),,1]))
 LC1[,,2] <- t(as.matrix(LC[nrow(LC),,2]))
 rownames(LC1) <- rownames(LC)[length(rownames(LC))]
+colnames(LC1) <- colnames(LC)
 
 input_data_y1 <- list("years"=(max(years_t)-4):max(years_t), "LF"=LC1)
 
 ## one fleet multiple years
 input_data_1fleet <- list("years"=years_t, "LF"=LC_bline)
 
+plot_LCfits(LFlist=list('bottomlongline'=LC_bline))
 
 ## one fleet one year
 LCb1 <- t(as.matrix(LC_bline[nrow(LC_bline),]))
@@ -122,17 +126,17 @@ input_data_1fleet1 <- list("years"=(max(years_t)-4):max(years_t), "LF"=LCb1)
 # compile("LIME.cpp")
 # dyn.load(file.path(src, "LIME.dll"))
 
-## annual LIME
-out <- file.path(res_dir, "LCy_2fleet_LFmult_multiyr")
-dir.create(out, showWarnings=FALSE)
 
-plist2$theta <- 1
-### multinomial working for multi-fleet -- but unusually high certainty
 ### dirichlet-multinomial cannot estimate theta and selectivity
 
 ## multinomial and dirichlet-multinomial working for only one fleet -- more uncertainty
 ## more realistic results with dirichlet-multinomial with only one fleet -- not as many spikes in SPR
-	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=0, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
+
+### multinomial working for multi-fleet multiyear-- but unusually high certainty
+out <- file.path(res_dir, "LCy_2fleet_LFmult_multiyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=0, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
 
 	df <- readRDS(file.path(out, "check_convergence.rds"))
 	Report <- readRDS(file.path(out, "Report.rds"))
@@ -143,25 +147,211 @@ plist2$theta <- 1
 	})
 	
 	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
-	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y$years, all_years=input_data_y$years, lc_years=rownames(input_data_y$LF[,,1]), lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
 	dev.off()
 
 	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
-	plot_LCfits(LFlist=LFlist, lc_years=Inputs$Data$LC_yrs, all_years=Inputs$Data$T_yrs, Report=Report, true_lc_years=rownames(input_data_y$LF[,,1]))
+	plot_LCfits(LFlist=LFlist,Report=Report)
 	dev.off()
 
-	# plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR"), true_years=input_data_1$years, all_years=input_data_1$years, lc_years=rownames(input_data_1$LF), lh=plist)
+## dirichlet multinomial with multifleet multiyear -- model NA
+	## ustep increases to 1
+	## outer mgc doesn't change much -- goes between 6675 and 1555, then down to 676
+	## dropout bc inner gradient had non-finite components
+	## gradient in optim evaluated to length 1 not 24 -- issue with zero values for length comp?
+out <- file.path(res_dir, "LCy_2fleet_LFdirmult_multiyr")
+dir.create(out, showWarnings=FALSE)
 
-	F30 <- tryCatch(uniroot(calc_ref, lower=0, upper=200, ages=plist2$ages, Mat_a=Report$Mat_a, W_a=Report$W_a, M=Report$M, S_a=Report$S_fa[1,], ref=0.3)$root, error=function(e) NA)
+	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=TRUE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param="log_theta", randomR=TRUE, newtonsteps=3, mirror=FALSE)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		lf <- Inputs$Data$LF_tbf[,,x]
+		if(is.vector(lf)){
+			lfout <- t(as.matrix(lf))
+			rownames(lfout) <- rownames(Inputs$Data$LF_tbf)
+			colnames(lfout) <- colnames(Inputs$Data$LF_tbf)
+		}
+		if(is.matrix(lf)) lfout <- lf
+		return(lfout)
+	})
+
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist, Report=Report)
+	dev.off()
 
 
-	png(file.path(out, "output.png"), width=16, height=10, res=200, units="in")
-	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, all_years=input_data_y$years, lc_years=rownames(input_data_y$LF), LBSPR=NULL, true_years=years_t, lh=plist)
-	dev.off()	
+## multinomial for multi-fleet one year
+out <- file.path(res_dir, "LCy_2fleet_LFmult_singleyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y1, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=0, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		lf <- Inputs$Data$LF_tbf[,,x]
+		if(is.vector(lf)){
+			lfout <- t(as.matrix(lf))
+			rownames(lfout) <- rownames(Inputs$Data$LF_tbf)
+			colnames(lfout) <- colnames(Inputs$Data$LF_tbf)
+		}
+		if(is.matrix(lf)) lfout <- lf
+		return(lfout)
+	})
 	
-	png(file.path(out, "LCfits.png"), width=16, height=10, res=200, units="in")
-	plot_LCfits(Inputs=Inputs$Data, Report=Report, true_lc_years=rownames(input_data_y$LF), LBSPR=NULL, ylim=c(0,0.3))
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y1$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
 	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist, Report=Report)
+	dev.off()
+
+
+## dirichlet multinomial for multi-fleet one year
+	## doesn't converge
+out <- file.path(res_dir, "LCy_2fleet_LFdirmult_singleyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist2, input_data=input_data_y1, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=plist2$S_l, L_a_input=-1, fix_param="log_theta", randomR=TRUE, newtonsteps=3)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		lf <- Inputs$Data$LF_tbf[,,x]
+		if(is.vector(lf)){
+			lfout <- t(as.matrix(lf))
+			rownames(lfout) <- rownames(Inputs$Data$LF_tbf)
+			colnames(lfout) <- colnames(Inputs$Data$LF_tbf)
+		}
+		if(is.matrix(lf)) lfout <- lf
+		return(lfout)
+	})
+
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y1$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist, Report=Report)
+	dev.off()
+
+
+### multinomial working for single fleet multiyear
+out <- file.path(res_dir, "LCy_1fleet_LFmult_multiyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_1fleet, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=0, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		return(Inputs$Data$LF_tbf[,,x])
+	})
+	
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist,Report=Report)
+	dev.off()
+
+### dirichlet multinomial working single fleet multiyear
+out <- file.path(res_dir, "LCy_1fleet_LFdirmult_multiyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_1fleet, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		return(Inputs$Data$LF_tbf[,,x])
+	})
+	
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_y$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist,Report=Report)
+	dev.off()
+
+
+### multinomial working for single fleet multiyear
+out <- file.path(res_dir, "LCy_1fleet_LFmult_singleyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_1fleet1, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=0, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		lf <- matrix(Inputs$Data$LF_tbf[,,x], nrow=Inputs$Data$n_lc, ncol=length(Inputs$Data$lbmids))
+		rownames(lf) <- Inputs$Data$LC_yrs
+		colnames(lf) <- Inputs$Data$lbmids
+		return(lf)
+	})
+	
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_1fleet1$years,  lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist,Report=Report)
+	dev.off()
+
+### dirichlet multinomial single fleet multiyear
+out <- file.path(res_dir, "LCy_1fleet_LFdirmult_singleyr")
+dir.create(out, showWarnings=FALSE)
+
+	res <- run_LIME(modpath=out, lh=plist, input_data=input_data_1fleet1, est_param="log_sigma_R", data_avail="LC", itervec=NULL, rewrite=FALSE, simulation=FALSE, f_true=FALSE, C_opt=0, LFdist=1, param_adjust=c("SigmaF","SigmaR","SigmaC","SigmaI"), val_adjust=c(0.2,0.737,0.2,0.2), F_up=10, S_l_input=-1, L_a_input=-1, fix_param=FALSE, randomR=TRUE, newtonsteps=3)
+
+	df <- readRDS(file.path(out, "check_convergence.rds"))
+	Report <- readRDS(file.path(out, "Report.rds"))
+	Sdreport <- readRDS(file.path(out, "Sdreport.rds"))
+	Inputs <- readRDS(file.path(out, "Inputs.rds"))
+	LFlist <- lapply(1:Inputs$Data$n_fl, function(x){
+		lf <- matrix(Inputs$Data$LF_tbf[,,x], nrow=Inputs$Data$n_lc, ncol=length(Inputs$Data$lbmids))
+		rownames(lf) <- Inputs$Data$LC_yrs
+		colnames(lf) <- Inputs$Data$lbmids
+		return(lf)
+	})
+
+	png(file.path(out, "output.png"), res=200, units="in", height=8, width=10)
+	plot_output(Inputs=Inputs, Report=Report, Sdreport=Sdreport, plot=c("Fish","Rec","SPR","Selex"), true_years=input_data_1fleet1$years, lh=plist2, set_ylim=list("Fish"=c(0,5)))
+	dev.off()
+
+	png(file.path(out, "LFfits.png"), res=200, units='in', height=8, width=10)
+	plot_LCfits(LFlist=LFlist,Report=Report)
+	dev.off()
+
+
+
+
+
+
+
+
+
 
 
 ## annual LIME
